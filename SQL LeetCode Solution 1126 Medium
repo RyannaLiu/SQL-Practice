@@ -1,0 +1,23 @@
+with t as 
+(select event_type, avg(occurences) as avo
+
+from Events
+
+group by event_type)
+
+
+select m.business_id
+from
+(select e.business_id, e.event_type, e.occurences
+
+from Events e
+
+left join t
+
+on e.event_type =t.event_type
+
+where e.occurences>t.avo) m
+
+group by m.business_id
+
+having count(m.event_type) >1
