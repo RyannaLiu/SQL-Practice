@@ -1,0 +1,20 @@
+with cte as 
+
+(select distinct customer_id, min(order_date) as first_order,customer_pref_delivery_date 
+
+from Delivery
+
+group by customer_id)
+
+select 
+
+round(sum(if (if_same='immediate',1,0))/count(*)*100,2) as immediate_percentage
+
+from 
+(select 
+
+case when first_order=customer_pref_delivery_date then 'immediate'
+     when first_order!=customer_pref_delivery_date then 'scheduled'
+end as if_same
+from cte
+) d
