@@ -1,0 +1,35 @@
+with m as
+(select u.user_id, ifnull(o.item_id,null) as item_id, u.favorite_brand, i.item_brand,
+
+dense_rank() over(partition by u.user_id order by o.order_date) as 'rnk'
+
+from Users u
+
+left join 
+
+Orders o
+on u.user_id =o.seller_id
+ 
+ left join 
+ 
+ Items i
+ 
+ on o.item_id=i.item_id
+
+group by u.user_id, o.order_date
+
+order by u.user_id)
+
+select distinct m1.user_id as seller_id,
+
+case when (m1.favorite_brand=m2.item_brand) then 'yes' 
+     else 'no' 
+end as '2nd_item_fav_brand'
+
+from m m1
+
+left join 
+
+(select * from m where rnk=2) m2
+
+on m1.user_id=m2.user_id
