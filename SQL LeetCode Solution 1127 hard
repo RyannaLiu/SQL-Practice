@@ -1,0 +1,35 @@
+with a as
+(select 
+
+user_id,
+spend_date,
+(case when count(distinct platform)=2 then 'both'
+     else platform
+end) as platform,
+sum(amount) as total_amount 
+
+from Spending
+
+group by user_id, spend_date),
+
+ b as 
+ 
+( (select distinct spend_date, 'mobile' as platform from Spending)
+ 
+ union
+ (select distinct spend_date, 'desktop' as platform from Spending)
+ 
+ union
+ (select distinct spend_date, 'both' as platform from Spending))
+ 
+select b.spend_date, b.platform, ifnull(sum(a.total_amount),0) as total_amount, ifnull(count(a.user_id),0) as total_users
+
+from b left join a
+
+on b.spend_date=a.spend_date
+
+and b.platform=a.platform
+
+group by b.spend_date, b.platform
+
+order by b.spend_date
