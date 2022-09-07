@@ -1,0 +1,37 @@
+with m as 
+
+(select first_player player,first_score score
+
+from Matches
+
+union all
+
+select second_player,second_score
+from Matches)
+,t as
+(select p.group_id, p.player_id, sum(m.score) as score_sum
+
+from Players p
+
+right join m 
+on p.player_id=m.player
+
+group by p.group_id, m.player
+
+order by p.group_id) 
+
+,d as
+(select group_id, player_id, score_sum,
+dense_rank() over(partition by group_id order by score_sum desc ) as 'rnk'
+
+from t
+
+group by group_id, player_id)
+
+select group_id, min(player_id) as player_id
+
+from d
+
+where rnk=1
+
+group by group_id
