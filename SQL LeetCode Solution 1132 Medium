@@ -1,0 +1,17 @@
+with a as
+(select  m.action_date, count(distinct n.post_id) /count(distinct m.post_id)*100 as 'cnt'
+
+from Actions m
+ 
+ left join Removals n
+ 
+ on m.post_id=n.post_id
+
+where m.extra='spam' and m.action ='report'
+
+group by m.action_date)
+
+
+select round(avg(cnt),2) as  average_daily_percent
+
+from a
